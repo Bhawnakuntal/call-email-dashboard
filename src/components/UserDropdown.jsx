@@ -1,27 +1,31 @@
-import { useContext } from "react";
+import React, { useContext } from "react";
 import { AppContext } from "../context/AppContext";
 
 export default function UserDropdown() {
-    const { users, selectedUser, setSelectedUser } = useContext(AppContext);
+  const { users, selectedUser, setSelectedUser } = useContext(AppContext);
 
-    const handleChange = (e) => {
-        const userId = e.target.value;
-        const user = users.find((u) => u.id === userId);
-        setSelectedUser(user);
-    };
-    return (
-        <div style={{ marginBottom: "20px" }}>
-            <label style ={{ marginRight: "10px" , fontWeight: "bold"}}>Select User:</label>
-            
-            <select value = {selectedUser?.id || ""} onChange={handleChange}>
-                <option value= "" >-- choose User --</option>
+  const handleChange = (e) => {
+    const userId = e.target.value;
+    // users.json uses 'userId' and 'userName'
+    const user = users.find((u) => u.userId === userId);
+    setSelectedUser(user || null);
+  };
 
-                {users.map((user) => (
-                    <option key={user.id} value={user.id}>
-                        {u.name}
-                    </option>
-                ))}
-            </select>
-        </div>
-    );
+  return (
+    <div style={{ marginBottom: "20px" }}>
+      <label style={{ marginRight: "10px", fontWeight: "bold" }}>
+        Select User:
+      </label>
+
+      <select value={selectedUser?.userId || ""} onChange={handleChange}>
+        <option value="">-- Choose User --</option>
+
+        {users.map((u) => (
+          <option key={u.userId} value={u.userId}>
+            {u.userName}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
 }
