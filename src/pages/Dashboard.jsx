@@ -1,6 +1,7 @@
 import { useContext, useMemo } from "react";
 import { AppContext } from "../context/AppContext";
 import UserDropdown from "../components/UserDropdown";
+import PieChart from "../components/PieChart";
 
 export default function Dashboard() {
   const { selectedUser, accounts, calls, emails } = useContext(AppContext);
@@ -13,22 +14,45 @@ export default function Dashboard() {
     );
   }, [selectedUser, accounts]);
 
-   // 2. Get all accountIds for the selected user's accounts
+  // 2. Extract account IDs for filtering calls & emails
   const accountIds = useMemo(() => {
     return filteredAccounts.map((acc) => acc.id);
   }, [filteredAccounts]);
 
-  // 3. Filter calls for these accountIds
+  // 3. Filter calls for these accounts
   const filteredCalls = useMemo(() => {
     if (!selectedUser) return [];
     return calls.filter((call) => accountIds.includes(call.accountId));
   }, [calls, accountIds, selectedUser]);
 
-  // 4. Filter emails for these accountIds
+  // 4. Filter emails for these accounts
   const filteredEmails = useMemo(() => {
     if (!selectedUser) return [];
     return emails.filter((email) => accountIds.includes(email.accountId));
   }, [emails, accountIds, selectedUser]);
+
+  // 5. Group calls by type (for pie chart)
+  const callTypeCounts = useMemo(() => {
+    const counts = {
+      faceToFace: 0,
+      inPerson: 0,
+      phone: 0,
+      email: 0,
+      other: 0
+    };
+
+    filteredCalls.forEach(call => {
+      const type = call.callType.toLowerCase();
+
+      if (type === "face to face") counts.faceToFace++;
+      else if (type === "inperson") counts.inPerson++;
+      else if (type === "phone") counts.phone++;
+      else if (type === "email") counts.email++;
+      else counts.other++;
+    });
+
+    return counts;
+  }, [filteredCalls]);
 
 
   return (
@@ -37,15 +61,29 @@ export default function Dashboard() {
 
       <UserDropdown />
 
+      {/* Selected Territory */}
       {selectedUser ? (
         <p>Selected Territory: {selectedUser.territory}</p>
       ) : (
         <p>Please select a user.</p>
       )}
 
+      {/* Accounts List */}
       {selectedUser && (
-        <div style={{ marginTop: "20px" }}>
+        <div
+          style={{
+            marginTop: "20px",
+            maxHeight: "180px",
+            overflowY: "auto",
+            border: "1px solid #ccc",
+            padding: "10px",
+            borderRadius: "5px",
+            background: "#fafafa"
+          }}
+        >
           <h3>Accounts in {selectedUser.territory} Territory:</h3>
+          <p>Total Accounts: {filteredAccounts.length}</p>
+
           <ul>
             {filteredAccounts.map((acc) => (
               <li key={acc.id}>{acc.name}</li>
@@ -54,32 +92,34 @@ export default function Dashboard() {
         </div>
       )}
 
+      {/* Pie Chart Section */}
+      {selectedUser && (
+        <PieChart counts={callTypeCounts} />
+      )}
+
+      {/* Calls Details */}
       {selectedUser && (
         <div style={{ marginTop: "20px" }}>
           <h3>Total Calls: {filteredCalls.length}</h3>
+          <ul>
+            {filteredCalls.map((call) => (
+              <li key={call.id}>
+                {call.callType} - {call.callResult}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Emails Details */}
+      {selectedUser && (
+        <div style={{ marginTop: "20px" }}>
           <h3>Total Emails: {filteredEmails.length}</h3>
-
-          <div style={{ marginTop: "10px" }}>
-            <h4>Calls:</h4>
-            <ul>
-              {filteredCalls.map((call) => (
-                <li key={call.id}>
-                  {call.callType} - {call.callResult}
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div style={{ marginTop: "10px" }}>
-            <h4>Emails:</h4>
-            <ul>
-              {filteredEmails.map((email) => (
-                <li key={email.id}>
-                  {email.status}
-                </li>
-              ))}
-            </ul>
-          </div>
+          <ul>
+            {filteredEmails.map((email) => (
+              <li key={email.id}>{email.status}</li>
+            ))}
+          </ul>
         </div>
       )}
 
