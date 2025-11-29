@@ -2,6 +2,7 @@ import { useContext, useMemo, useState } from "react";
 import Navbar from "../components/Navbar";
 import { AppContext } from "../context/AppContext";
 import PieChart from "../components/PieChart";
+import TerritoryTable from "../components/TerritoryTable";
 import CallsTable from "../components/CallsTable";
 
 export default function Dashboard() {
@@ -155,46 +156,18 @@ export default function Dashboard() {
               </div>
             )}
           </div>
-
-          {/* USER TERRITORY ACCOUNT DETAILS TABLE BELOW EVERYTHING */}
-          <div
-            style={{
-              marginTop: "40px",
-              background: "#e7f1ff",
-              padding: "20px",
-              borderRadius: "12px",
-              boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
-            }}
-          >
-            <h3>{selectedUser.userName}'s Territory Account Details</h3>
-            <table style={{ width: "100%", marginTop: "10px" }}>
-              <thead>
-                <tr>
-                  <th>Account Name</th>
-                  <th>Total Calls</th>
-                  <th>Total Emails</th>
-                  <th>Latest Call Date</th>
-                  <th>Latest Email Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredAccounts.map((acc) => {
-                  const accCalls = filteredCalls.filter(c => c.accountId === acc.id);
-                  const accEmails = filteredEmails.filter(e => e.accountId === acc.id);
-
-                  return (
-                    <tr key={acc.id}>
-                      <td>{acc.name}</td>
-                      <td>{accCalls.length}</td>
-                      <td>{accEmails.length}</td>
-                      <td>{accCalls[0]?.callDate?.slice(0,10) || "-"}</td>
-                      <td>{accEmails[0]?.emailDate?.slice(0,10) || "-"}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+          
+          {/* TERRITORY ACCOUNT DETAILS TABLE (always visible after selecting a user) */}
+          {selectedUser && (
+            <div style={{ marginTop: "40px" }}>
+              <TerritoryTable
+                accounts={filteredAccounts} 
+                calls={filteredCalls}
+                emails={filteredEmails}
+              />
+            </div>
+          )}
+          
         </div>
       )}
     </>
