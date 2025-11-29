@@ -11,26 +11,22 @@ export default function Dashboard() {
   // ⭐ Correct place for useState
   const [selectedSegment, setSelectedSegment] = useState(null);
 
-  // 1. Filter accounts based on selected user's territory
+  // 1. Filter accounts based on user's territory
   const filteredAccounts = useMemo(() => {
-    if (!selectedUser || !selectedUser.territory) return [];
-    return accounts.filter(
-      acc => acc.territory === selectedUser.territory
-    );
+    if (!selectedUser) return [];
+    return accounts.filter(acc => acc.territory === selectedUser.territory);
   }, [selectedUser, accounts]);
 
   // 2. Extract account IDs
-  const accountIds = useMemo(() => {
-    return filteredAccounts.map(acc => acc.id);
-  }, [filteredAccounts]);
+  const accountIds = filteredAccounts.map(acc => acc.id);
 
-  // 3. Filter calls for these accounts
+  // 3. Filter calls
   const filteredCalls = useMemo(() => {
     if (!selectedUser) return [];
     return calls.filter(call => accountIds.includes(call.accountId));
   }, [calls, accountIds, selectedUser]);
 
-  // 4. Filter emails for these accounts
+  // 4. Filter emails
   const filteredEmails = useMemo(() => {
     if (!selectedUser) return [];
     return emails.filter(email => accountIds.includes(email.accountId));
@@ -111,69 +107,30 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* IF USER SELECTED → Show Pie Chart + Table */}
+      {/* IF USER SELECTED → Show Pie Chart + Bottom Table */}
+      
       {selectedUser && (
-        <div style={{ padding: "30px" }}>
-          {/* Your existing pie chart + table layout here */}
-        </div>
-      )}
+        <div style={{ padding: "20px" }}>
 
-      <div style={{ padding: "20px" }}>
-        
-
-        {/* Selected Territory
-        {selectedUser ? (
-          <p>Selected Territory: {selectedUser.territory}</p>
-        ) : (
-          
-        )} */}
-
-        {/* Accounts List */}
-        {selectedUser && (
+          {/* PIE CHART + RIGHT TABLE (only when a segment is clicked) */}
           <div
             style={{
               marginTop: "20px",
-              maxHeight: "180px",
-              overflowY: "auto",
-              border: "1px solid #ccc",
-              padding: "10px",
-              borderRadius: "5px",
-              background: "#fafafa"
-            }}
-          >
-            <h3>Accounts in {selectedUser.territory} Territory:</h3>
-            <p>Total Accounts: {filteredAccounts.length}</p>
-
-            <ul>
-              {filteredAccounts.map(acc => (
-                <li key={acc.id}>{acc.name}</li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-
-        {/* PIE CHART + TABLE SECTION(table After clicking the segment) */}
-        {selectedUser && (
-          <div
-            style={{
-              marginTop: "40px",
               display: "flex",
               justifyContent: "center",
               alignItems: "flex-start",
-              gap: "40px"
+              gap: "40px",
             }}
           >
-
-            {/* LEFT BOX → PIE CHART */}
+            {/* LEFT PIE BOX ALWAYS visible after selecting user */}
             <div
               style={{
                 background: "#e7f1ff",
                 padding: "10px",
                 borderRadius: "12px",
                 width: "620px",
-                minHeight: "585px",
-                boxShadow: "0 2px 6px rgba(0,0,0,0.15)"
+                minHeight: "580px",
+                boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
               }}
             >
               <PieChart
@@ -182,7 +139,7 @@ export default function Dashboard() {
               />
             </div>
 
-            {/* RIGHT BOX → TABLE */}
+            {/* RIGHT TABLE ONLY WHEN A SEGMENT IS CLICKED */}
             {selectedSegment && (
               <div
                 style={{
@@ -191,44 +148,56 @@ export default function Dashboard() {
                   borderRadius: "12px",
                   width: "620px",
                   minHeight: "80px",
-                  boxShadow: "0 2px 6px rgba(0,0,0,0.15)"
+                  boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
                 }}
               >
                 <CallsTable calls={segmentCalls} segmentName={selectedSegment} />
               </div>
             )}
-
           </div>
-        )}
 
+          {/* USER TERRITORY ACCOUNT DETAILS TABLE BELOW EVERYTHING */}
+          <div
+            style={{
+              marginTop: "40px",
+              background: "#e7f1ff",
+              padding: "20px",
+              borderRadius: "12px",
+              boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
+            }}
+          >
+            <h3>{selectedUser.userName}'s Territory Account Details</h3>
+            <table style={{ width: "100%", marginTop: "10px" }}>
+              <thead>
+                <tr>
+                  <th>Account Name</th>
+                  <th>Total Calls</th>
+                  <th>Total Emails</th>
+                  <th>Latest Call Date</th>
+                  <th>Latest Email Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredAccounts.map((acc) => {
+                  const accCalls = filteredCalls.filter(c => c.accountId === acc.id);
+                  const accEmails = filteredEmails.filter(e => e.accountId === acc.id);
 
-        {/* Calls Details */}
-        {selectedUser && (
-          <div style={{ marginTop: "20px" }}>
-            <h3>Total Calls: {filteredCalls.length}</h3>
-            <ul>
-              {filteredCalls.map(call => (
-                <li key={call.id}>
-                  {call.callType} - {call.callStatus}
-                </li>
-              ))}
-            </ul>
+                  return (
+                    <tr key={acc.id}>
+                      <td>{acc.name}</td>
+                      <td>{accCalls.length}</td>
+                      <td>{accEmails.length}</td>
+                      <td>{accCalls[0]?.callDate?.slice(0,10) || "-"}</td>
+                      <td>{accEmails[0]?.emailDate?.slice(0,10) || "-"}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
-        )}
-
-        {/* Emails Details */}
-        {selectedUser && (
-          <div style={{ marginTop: "20px" }}>
-            <h3>Total Emails: {filteredEmails.length}</h3>
-            <ul>
-              {filteredEmails.map(email => (
-                <li key={email.id}>{email.status}</li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-      </div>
+        </div>
+      )}
     </>
   );
 }
+      
