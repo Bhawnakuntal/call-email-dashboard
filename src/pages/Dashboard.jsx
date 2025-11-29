@@ -1,4 +1,4 @@
-import { useContext, useMemo, useState } from "react";
+import { useContext, useMemo, useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
 import { AppContext } from "../context/AppContext";
 import PieChart from "../components/PieChart";
@@ -11,6 +11,10 @@ export default function Dashboard() {
 
   // ⭐ Correct place for useState
   const [selectedSegment, setSelectedSegment] = useState(null);
+
+  useEffect(() => {
+    setSelectedSegment(null);
+  }, [selectedUser]);
 
   // 1. Filter accounts based on user's territory
   const filteredAccounts = useMemo(() => {
@@ -129,8 +133,8 @@ export default function Dashboard() {
                 background: "#e7f1ff",
                 padding: "10px",
                 borderRadius: "12px",
-                width: "620px",
-                minHeight: "580px",
+                width: "750px",
+                minHeight: "400px",
                 boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
               }}
             >
@@ -145,10 +149,10 @@ export default function Dashboard() {
               <div
                 style={{
                   background: "#e7f1ff",
-                  padding: "30px",
+                  padding: "5px",
                   borderRadius: "12px",
-                  width: "620px",
-                  minHeight: "80px",
+                  width: "750px",
+                  minHeight: "100px",
                   boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
                 }}
               >
