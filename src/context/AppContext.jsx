@@ -1,5 +1,10 @@
 import React, { createContext, useState, useEffect } from "react";
 
+import usersData from "../data/users.json";
+import accountsData from "../data/accounts.json";
+import callsData from "../data/calls.json";
+import emailsData from "../data/emails.json";
+
 export const AppContext = createContext();
 
 export default function AppProvider({ children }) {
@@ -8,14 +13,13 @@ export default function AppProvider({ children }) {
   const [calls, setCalls] = useState([]);
   const [emails, setEmails] = useState([]);
 
-  const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedUser, setSelectedUser] = useState("");
 
-  // Load JSON files from /data
   useEffect(() => {
-    import("../data/users.json").then((d) => setUsers(d.default || d));
-    import("../data/accounts.json").then((d) => setAccounts(d.default || d));
-    import("../data/calls.json").then((d) => setCalls(d.default || d));
-    import("../data/emails.json").then((d) => setEmails(d.default || d));
+    setUsers(usersData);
+    setAccounts(accountsData);
+    setCalls(callsData);
+    setEmails(emailsData);
   }, []);
 
   return (

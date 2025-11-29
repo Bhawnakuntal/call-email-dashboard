@@ -1,6 +1,6 @@
 import { useContext, useMemo, useState } from "react";
+import Navbar from "../components/Navbar";
 import { AppContext } from "../context/AppContext";
-import UserDropdown from "../components/UserDropdown";
 import PieChart from "../components/PieChart";
 import CallsTable from "../components/CallsTable";
 
@@ -13,7 +13,7 @@ export default function Dashboard() {
 
   // 1. Filter accounts based on selected user's territory
   const filteredAccounts = useMemo(() => {
-    if (!selectedUser) return [];
+    if (!selectedUser || !selectedUser.territory) return [];
     return accounts.filter(
       acc => acc.territory === selectedUser.territory
     );
@@ -70,118 +70,165 @@ export default function Dashboard() {
 
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h1>Dashboard</h1>
+    <>
+      <Navbar />
 
-      <UserDropdown />
-
-      {/* Selected Territory */}
-      {selectedUser ? (
-        <p>Selected Territory: {selectedUser.territory}</p>
-      ) : (
-        <p>Please select a user.</p>
-      )}
-
-      {/* Accounts List */}
-      {selectedUser && (
+       {/* TOP LIGHT BLUE BOX */}
+      {!selectedUser && (
         <div
           style={{
+            background: "#eef4ff",
+            padding: "25px",
             marginTop: "20px",
-            maxHeight: "180px",
-            overflowY: "auto",
-            border: "1px solid #ccc",
-            padding: "10px",
-            borderRadius: "5px",
-            background: "#fafafa"
+            textAlign: "center",
+            fontSize: "18px",
+            fontWeight: "600",
+            color: "#2a4ea2",
+            borderRadius: "10px",
+            boxShadow: "0px 2px 5px rgba(0,0,0,0.1)"
           }}
         >
-          <h3>Accounts in {selectedUser.territory} Territory:</h3>
-          <p>Total Accounts: {filteredAccounts.length}</p>
-
-          <ul>
-            {filteredAccounts.map(acc => (
-              <li key={acc.id}>{acc.name}</li>
-            ))}
-          </ul>
+          Please Select a User to View Analytics
         </div>
       )}
 
-
-      {/* PIE CHART + TABLE SECTION(table After clicking the segment) */}
-      {selectedUser && (
+      {/* SECOND LIGHT BLUE BOX */}
+      {!selectedUser && (
         <div
           style={{
-            marginTop: "40px",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "flex-start",
-            gap: "40px"
+            background: "#eef4ff",
+            padding: "25px",
+            marginTop: "20px",
+            textAlign: "center",
+            fontSize: "18px",
+            fontWeight: "600",
+            color: "#2a4ea2",
+            borderRadius: "10px",
+            boxShadow: "0px 2px 5px rgba(0,0,0,0.1)"
           }}
         >
+          Please select a user to view account details.
+        </div>
+      )}
 
-          {/* LEFT BOX → PIE CHART */}
+      {/* IF USER SELECTED → Show Pie Chart + Table */}
+      {selectedUser && (
+        <div style={{ padding: "30px" }}>
+          {/* Your existing pie chart + table layout here */}
+        </div>
+      )}
+
+      <div style={{ padding: "20px" }}>
+        
+
+        {/* Selected Territory
+        {selectedUser ? (
+          <p>Selected Territory: {selectedUser.territory}</p>
+        ) : (
+          
+        )} */}
+
+        {/* Accounts List */}
+        {selectedUser && (
           <div
             style={{
-              background: "#e7f1ff",
+              marginTop: "20px",
+              maxHeight: "180px",
+              overflowY: "auto",
+              border: "1px solid #ccc",
               padding: "10px",
-              borderRadius: "12px",
-              width: "620px",
-              minHeight: "585px",
-              boxShadow: "0 2px 6px rgba(0,0,0,0.15)"
+              borderRadius: "5px",
+              background: "#fafafa"
             }}
           >
-            <PieChart
-              counts={callTypeCounts}
-              onSliceClick={(segment) => setSelectedSegment(segment)}
-            />
-          </div>
+            <h3>Accounts in {selectedUser.territory} Territory:</h3>
+            <p>Total Accounts: {filteredAccounts.length}</p>
 
-          {/* RIGHT BOX → TABLE */}
-          {selectedSegment && (
+            <ul>
+              {filteredAccounts.map(acc => (
+                <li key={acc.id}>{acc.name}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+
+        {/* PIE CHART + TABLE SECTION(table After clicking the segment) */}
+        {selectedUser && (
+          <div
+            style={{
+              marginTop: "40px",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "flex-start",
+              gap: "40px"
+            }}
+          >
+
+            {/* LEFT BOX → PIE CHART */}
             <div
               style={{
                 background: "#e7f1ff",
-                padding: "30px",
+                padding: "10px",
                 borderRadius: "12px",
                 width: "620px",
-                minHeight: "80px",
+                minHeight: "585px",
                 boxShadow: "0 2px 6px rgba(0,0,0,0.15)"
               }}
             >
-              <CallsTable calls={segmentCalls} segmentName={selectedSegment} />
+              <PieChart
+                counts={callTypeCounts}
+                onSliceClick={(segment) => setSelectedSegment(segment)}
+              />
             </div>
-          )}
 
-        </div>
-      )}
+            {/* RIGHT BOX → TABLE */}
+            {selectedSegment && (
+              <div
+                style={{
+                  background: "#e7f1ff",
+                  padding: "30px",
+                  borderRadius: "12px",
+                  width: "620px",
+                  minHeight: "80px",
+                  boxShadow: "0 2px 6px rgba(0,0,0,0.15)"
+                }}
+              >
+                <CallsTable calls={segmentCalls} segmentName={selectedSegment} />
+              </div>
+            )}
+
+          </div>
+        )}
 
 
-      {/* Calls Details */}
-      {selectedUser && (
-        <div style={{ marginTop: "20px" }}>
-          <h3>Total Calls: {filteredCalls.length}</h3>
-          <ul>
-            {filteredCalls.map(call => (
-              <li key={call.id}>
-                {call.callType} - {call.callResult}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+        {/* Calls Details */}
+        {selectedUser && (
+          <div style={{ marginTop: "20px" }}>
+            <h3>Total Calls: {filteredCalls.length}</h3>
+            <ul>
+              {filteredCalls.map(call => (
+                <li key={call.id}>
+                  {call.callType} - {call.callStatus}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
-      {/* Emails Details */}
-      {selectedUser && (
-        <div style={{ marginTop: "20px" }}>
-          <h3>Total Emails: {filteredEmails.length}</h3>
-          <ul>
-            {filteredEmails.map(email => (
-              <li key={email.id}>{email.status}</li>
-            ))}
-          </ul>
-        </div>
-      )}
+        {/* Emails Details */}
+        {selectedUser && (
+          <div style={{ marginTop: "20px" }}>
+            <h3>Total Emails: {filteredEmails.length}</h3>
+            <ul>
+              {filteredEmails.map(email => (
+                <li key={email.id}>{email.status}</li>
+              ))}
+            </ul>
+          </div>
+        )}
 
-    </div>
+      </div>
+    </>
   );
 }
