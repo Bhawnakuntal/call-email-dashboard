@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import { Pie } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -9,14 +10,7 @@ import ChartDataLabels from "chartjs-plugin-datalabels";
 
 ChartJS.register(ArcElement, Tooltip, Legend, ChartDataLabels);
 
-export default function PieChart({ counts }) {
-  const dataValues = [
-    counts.faceToFace,
-    counts.inPerson,
-    counts.phone,
-    counts.email,
-    counts.other
-  ];
+export default function PieChart({ counts, onSliceClick }) {
 
   const labels = [
     "Face to Face",
@@ -24,6 +18,14 @@ export default function PieChart({ counts }) {
     "Phone",
     "Email",
     "Other"
+  ];
+
+  const dataValues = [
+    counts.faceToFace,
+    counts.inPerson,
+    counts.phone,
+    counts.email,
+    counts.other
   ];
 
   const total = dataValues.reduce((a, b) => a + b, 0);
@@ -40,37 +42,64 @@ export default function PieChart({ counts }) {
           "#6495ED",
           "#4682B4"
         ],
-        borderColor: "#ffffff",
+        borderColor: "#c7dcfbff",
         borderWidth: 2,
       },
     ],
   };
 
+  // ⭐ THIS IS THE MAGIC FIX — always fires on click ⭐
+  const handlePieClick = (event) => {
+    const chart = chartRef.current;
+
+    if (!chart) return;
+
+    const elements = chart.getElementsAtEventForMode(
+      event,
+      "nearest",
+      { intersect: true },
+      true
+    );
+
+    if (!elements.length) return;
+
+    const sliceIndex = elements[0].index;
+    const segmentName = labels[sliceIndex];
+
+    if (onSliceClick) {
+      onSliceClick(segmentName);
+    }
+  };
+
+  // ⭐ We MUST store the chart instance to detect clicks
+  const chartRef = useRef(null);
+
   const options = {
     responsive: true,
     maintainAspectRatio: false,
     layout: {
-      padding: 20
-    },
+      padding: 47,},
+
+    onClick: handlePieClick,
+
     plugins: {
       legend: {
         position: "top",
+        align: "center",
         labels: {
-          boxWidth: 12,     // ⭐ smaller legend box
+          boxWidth: 12,
           boxHeight: 12,
-          padding: 12,      // ⭐ even spacing
-          font: {
-            size: 13,
-            weight: "bold",
-          },
+          padding: 10,
+          font: { size: 13, weight: "bold" },
           color: "#004085",
         },
+        
       },
+
       datalabels: {
         color: "#004085",
-        top : 800,
         font: {
-          size: 13,
+          size: 10,
           weight: "bold",
         },
         formatter: (value, ctx) => {
@@ -79,9 +108,9 @@ export default function PieChart({ counts }) {
           return `${label} (${percentage}%)`;
         },
         anchor: "end",
-        align: "center",
-        offset: 15,
-        clamp: true,
+        align: "end",
+        offset: -3,
+        clamp: false,
       },
     },
   };
@@ -89,14 +118,18 @@ export default function PieChart({ counts }) {
   return (
     <div 
       style={{
-        width: "950px",
-        height: "400px",
-        marginTop: "20px",
+        width: "500px",
+        height: "500px",
+        marginTop: "10px",
         marginLeft: "auto",
         marginRight: "auto"
       }}
     >
-      <Pie data={data} options={options} />
+      <Pie 
+        ref={chartRef}          // ⭐ important
+        data={data}
+        options={options}
+      />
     </div>
   );
 }

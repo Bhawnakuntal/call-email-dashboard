@@ -1,34 +1,39 @@
-import { useContext, useMemo } from "react";
+import { useContext, useMemo, useState } from "react";
 import { AppContext } from "../context/AppContext";
 import UserDropdown from "../components/UserDropdown";
 import PieChart from "../components/PieChart";
+import CallsTable from "../components/CallsTable";
 
 export default function Dashboard() {
+
   const { selectedUser, accounts, calls, emails } = useContext(AppContext);
+
+  // ⭐ Correct place for useState
+  const [selectedSegment, setSelectedSegment] = useState(null);
 
   // 1. Filter accounts based on selected user's territory
   const filteredAccounts = useMemo(() => {
     if (!selectedUser) return [];
     return accounts.filter(
-      (acc) => acc.territory === selectedUser.territory
+      acc => acc.territory === selectedUser.territory
     );
   }, [selectedUser, accounts]);
 
-  // 2. Extract account IDs for filtering calls & emails
+  // 2. Extract account IDs
   const accountIds = useMemo(() => {
-    return filteredAccounts.map((acc) => acc.id);
+    return filteredAccounts.map(acc => acc.id);
   }, [filteredAccounts]);
 
   // 3. Filter calls for these accounts
   const filteredCalls = useMemo(() => {
     if (!selectedUser) return [];
-    return calls.filter((call) => accountIds.includes(call.accountId));
+    return calls.filter(call => accountIds.includes(call.accountId));
   }, [calls, accountIds, selectedUser]);
 
   // 4. Filter emails for these accounts
   const filteredEmails = useMemo(() => {
     if (!selectedUser) return [];
-    return emails.filter((email) => accountIds.includes(email.accountId));
+    return emails.filter(email => accountIds.includes(email.accountId));
   }, [emails, accountIds, selectedUser]);
 
   // 5. Group calls by type (for pie chart)
@@ -53,6 +58,15 @@ export default function Dashboard() {
 
     return counts;
   }, [filteredCalls]);
+
+  // 6. Filter calls when clicking a pie slice
+  const segmentCalls = useMemo(() => {
+    if (!selectedSegment) return [];
+
+    return filteredCalls.filter(call =>
+      call.callType.toLowerCase() === selectedSegment.toLowerCase()
+    );
+  }, [selectedSegment, filteredCalls]);
 
 
   return (
@@ -85,24 +99,69 @@ export default function Dashboard() {
           <p>Total Accounts: {filteredAccounts.length}</p>
 
           <ul>
-            {filteredAccounts.map((acc) => (
+            {filteredAccounts.map(acc => (
               <li key={acc.id}>{acc.name}</li>
             ))}
           </ul>
         </div>
       )}
 
-      {/* Pie Chart Section */}
+
+      {/* PIE CHART + TABLE SECTION(table After clicking the segment) */}
       {selectedUser && (
-        <PieChart counts={callTypeCounts} />
+        <div
+          style={{
+            marginTop: "40px",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "flex-start",
+            gap: "40px"
+          }}
+        >
+
+          {/* LEFT BOX → PIE CHART */}
+          <div
+            style={{
+              background: "#e7f1ff",
+              padding: "10px",
+              borderRadius: "12px",
+              width: "620px",
+              minHeight: "585px",
+              boxShadow: "0 2px 6px rgba(0,0,0,0.15)"
+            }}
+          >
+            <PieChart
+              counts={callTypeCounts}
+              onSliceClick={(segment) => setSelectedSegment(segment)}
+            />
+          </div>
+
+          {/* RIGHT BOX → TABLE */}
+          {selectedSegment && (
+            <div
+              style={{
+                background: "#e7f1ff",
+                padding: "30px",
+                borderRadius: "12px",
+                width: "620px",
+                minHeight: "80px",
+                boxShadow: "0 2px 6px rgba(0,0,0,0.15)"
+              }}
+            >
+              <CallsTable calls={segmentCalls} segmentName={selectedSegment} />
+            </div>
+          )}
+
+        </div>
       )}
+
 
       {/* Calls Details */}
       {selectedUser && (
         <div style={{ marginTop: "20px" }}>
           <h3>Total Calls: {filteredCalls.length}</h3>
           <ul>
-            {filteredCalls.map((call) => (
+            {filteredCalls.map(call => (
               <li key={call.id}>
                 {call.callType} - {call.callResult}
               </li>
@@ -116,7 +175,7 @@ export default function Dashboard() {
         <div style={{ marginTop: "20px" }}>
           <h3>Total Emails: {filteredEmails.length}</h3>
           <ul>
-            {filteredEmails.map((email) => (
+            {filteredEmails.map(email => (
               <li key={email.id}>{email.status}</li>
             ))}
           </ul>
