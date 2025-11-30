@@ -9,7 +9,6 @@ export default function Dashboard() {
 
   const { selectedUser, accounts, calls, emails } = useContext(AppContext);
 
-  // ⭐ Correct place for useState
   const [selectedSegment, setSelectedSegment] = useState(null);
 
   useEffect(() => {
@@ -165,6 +164,7 @@ export default function Dashboard() {
           {selectedUser && (
             <div style={{ marginTop: "40px" }}>
               <TerritoryTable
+                selectedUser={selectedUser}
                 accounts={filteredAccounts} 
                 calls={filteredCalls}
                 emails={filteredEmails}

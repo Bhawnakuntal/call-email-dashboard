@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
 
-export default function TerritoryTable({ accounts, calls, emails }) {
+export default function TerritoryTable({ selectedUser, accounts, calls, emails }) {
   const rowsPerPage = 8;
   const [page, setPage] = useState(1);
 
@@ -18,7 +18,7 @@ export default function TerritoryTable({ accounts, calls, emails }) {
         : "—";
 
       const latestEmail = accEmails.length
-        ? new Date(Math.max(...accEmails.map(e => new Date(e.callDate)))).toLocaleDateString("en-GB")
+        ? new Date(Math.max(...accEmails.map(e => new Date(e.emailDate)))).toLocaleDateString("en-GB")
         : "—";
 
       return {
@@ -47,7 +47,7 @@ export default function TerritoryTable({ accounts, calls, emails }) {
       }}
     >
       <h3 style={{ textAlign: "center", marginBottom: "15px" }}>
-        User's Territory Account Details
+        {selectedUser?.userName}'s Territory Account Details
       </h3>
 
       {/* Table */}

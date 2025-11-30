@@ -48,7 +48,7 @@ export default function PieChart({ counts, onSliceClick }) {
     ],
   };
 
-  // ⭐ THIS IS THE MAGIC FIX — always fires on click ⭐
+  // THIS IS THE MAGIC FIX — always fires on click 
   const handlePieClick = (event) => {
     const chart = chartRef.current;
 
@@ -71,7 +71,7 @@ export default function PieChart({ counts, onSliceClick }) {
     }
   };
 
-  // ⭐ We MUST store the chart instance to detect clicks
+  // We MUST store the chart instance to detect clicks
   const chartRef = useRef(null);
 
   const options = {
