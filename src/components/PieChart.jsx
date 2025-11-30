@@ -126,7 +126,7 @@ export default function PieChart({ counts, onSliceClick }) {
       }}
     >
       <Pie 
-        ref={chartRef}          // ⭐ important
+        ref={chartRef}          // important
         data={data}
         options={options}
       />
